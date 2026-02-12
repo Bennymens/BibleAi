@@ -68,8 +68,8 @@ export default function BubbleButton({ onClick, label = "Start Listening" }) {
         
         .bubble-button {
           position: relative;
-          padding: 1.5rem 3.5rem;
-          font-size: 1.25rem;
+          padding: 1rem 2.5rem;
+          font-size: 1rem;
           font-weight: 600;
           font-family: 'Outfit', sans-serif;
           letter-spacing: 0.5px;
@@ -87,7 +87,25 @@ export default function BubbleButton({ onClick, label = "Start Listening" }) {
             0 8px 32px rgba(255, 255, 255, 0.1),
             inset 0 1px 0 rgba(255, 255, 255, 0.6),
             inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-          margin-top: 12rem;
+          margin-top: 6rem;
+          min-height: 44px;
+          min-width: 44px;
+        }
+        
+        @media (min-width: 480px) {
+          .bubble-button {
+            padding: 1.25rem 3rem;
+            font-size: 1.125rem;
+            margin-top: 8rem;
+          }
+        }
+        
+        @media (min-width: 768px) {
+          .bubble-button {
+            padding: 1.5rem 3.5rem;
+            font-size: 1.25rem;
+            margin-top: 12rem;
+          }
         }
         
         @media (max-width: 768px) {

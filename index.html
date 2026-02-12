@@ -5,22 +5,47 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no"
     />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
     <title>biblebridge</title>
     <style>
-      html, body { 
-        margin: 0 !important; 
-        padding: 0 !important; 
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: hidden !important;
         position: fixed !important;
         width: 100% !important;
         height: 100% !important;
+        height: 100vh !important;
+        height: 100svh !important;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior: none;
+      }
+
+      /* iOS Safari */
+      @supports (-webkit-touch-callout: none) {
+        html,
+        body {
+          height: -webkit-fill-available !important;
+        }
+      }
+
+      #root {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        inset: 0;
       }
     </style>
   </head>

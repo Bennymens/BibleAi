@@ -80,7 +80,7 @@ function HomePage({
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden safe-area">
       <div className="absolute inset-0 w-full h-full">
         <DarkVeil
           hueShift={0}
@@ -91,23 +91,25 @@ function HomePage({
           warpAmount={0}
         />
       </div>
-      <div className="relative z-10 text-center flex flex-col items-center justify-center">
+      <div className="relative z-10 text-center flex flex-col items-center justify-center px-4 sm:px-6">
         {!isListening &&
           !(window.SpeechRecognition || window.webkitSpeechRecognition) && (
-            <p className="mt-4 text-base text-red-400 mb-4">
+            <p className="mt-4 text-sm sm:text-base text-red-400 mb-4 px-4">
               Speech recognition is not supported in this browser. Please use
               Chrome, Edge, or Safari.
             </p>
           )}
 
-        <BubbleButton
-          onClick={() => {
-            navigate("/listening");
-          }}
-          label="Start Listening"
-        />
+        <div className="touch-target">
+          <BubbleButton
+            onClick={() => {
+              navigate("/listening");
+            }}
+            label="Start Listening"
+          />
+        </div>
 
-        <p className="mt-6 text-base text-gray-400 mb-4">
+        <p className="mt-6 text-sm sm:text-base text-gray-400 mb-4 px-4">
           Click the button to start voice recognition
         </p>
       </div>
