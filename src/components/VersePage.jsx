@@ -4,7 +4,7 @@ const VersePage = ({ scripture, onBack, translation, onTranslationChange }) => {
   if (!scripture) return null;
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8">
+    <div className="h-screen bg-white flex flex-col items-center justify-center p-8 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

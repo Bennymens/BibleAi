@@ -8,11 +8,13 @@ import {
 } from "react-router-dom";
 import TranslationSelector from "./components/TranslationSelector";
 import VersePage from "./components/VersePage";
+import ListeningPage from "./components/ListeningPage";
 import DarkVeil from "./components/DarkVeil";
 import BubbleButton from "./components/BubbleButton";
 import { startListening, stopListening } from "./utils/speechRecognition";
 import { startVolumeDetection, stopVolumeDetection } from "./utils/audioVolume";
 import { parseScripture } from "./utils/parseScripture";
+import { getScripture } from "./data/bibleDB";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -31,7 +33,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="h-screen bg-black flex items-center justify-center overflow-hidden">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold mb-4">Something went wrong</h1>
             <p className="text-lg mb-4">
@@ -73,18 +75,12 @@ function HomePage({
 }) {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (scripture) {
-      navigate("/verse");
-    }
-  }, [scripture, navigate]);
-
   const handleTranslationChange = (newTrans) => {
     setTranslation(newTrans);
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         <DarkVeil
           hueShift={0}
@@ -106,32 +102,21 @@ function HomePage({
 
         <BubbleButton
           onClick={() => {
-            if (isListening) {
-              setTranscript("");
-              setInterimTranscript("");
-            }
-            setIsListening(!isListening);
+            navigate("/listening");
           }}
-          label={isListening ? "Stop Listening" : "Start Listening"}
+          label="Start Listening"
         />
 
-        <p className="mt-6 text-base text-gray-400 mb-4 min-h-[60px] flex items-center justify-center">
-          {transcript || interimTranscript ? (
-            <>
-              {transcript || interimTranscript}
-              {!transcript && interimTranscript && (
-                <span className="opacity-50 ml-2">(listening...)</span>
-              )}
-            </>
-          ) : null}
+        <p className="mt-6 text-base text-gray-400 mb-4">
+          Click the button to start voice recognition
         </p>
-        {error && <p className="mt-4 text-red-500">{error}</p>}
       </div>
     </div>
   );
 }
 
 function AppContent() {
+  const navigate = useNavigate();
   const [transcript, setTranscript] = useState("");
   const [scripture, setScripture] = useState(null);
   const [translation, setTranslation] = useState("KJV");
@@ -141,18 +126,24 @@ function AppContent() {
   const [interimTranscript, setInterimTranscript] = useState("");
 
   const fetchScripture = async (book, chapter, verse, trans) => {
-    // Mock response for testing
-    const mockData = {
-      book,
-      chapter: parseInt(chapter),
-      verse: parseInt(verse),
-      translation: trans,
-      text: `This is a mock scripture for ${book} ${chapter}:${verse} in ${trans}. Replace with real Bible text when backend is ready.`,
-    };
-    setScripture(mockData);
-    setError("");
-  };
+    const result = getScripture(book, chapter, verse, trans);
 
+    if (result) {
+      setScripture(result);
+      setError("");
+    } else {
+      setError(
+        `Scripture not found: ${book} ${chapter}:${verse}. Try John 3:16, Psalm 23:1, or Genesis 1:1`,
+      );
+      setTimeout(() => setError(""), 5000);
+    }
+  };
+  // Navigate to verse page when scripture is detected
+  useEffect(() => {
+    if (scripture) {
+      navigate("/verse");
+    }
+  }, [scripture, navigate]);
   useEffect(() => {
     if (isListening) {
       startListening((finalText, interimText) => {
@@ -211,6 +202,19 @@ function AppContent() {
             setScripture={setScripture}
             setTranscript={setTranscript}
             setInterimTranscript={setInterimTranscript}
+          />
+        }
+      />
+      <Route
+        path="/listening"
+        element={
+          <ListeningPage
+            transcript={transcript}
+            interimTranscript={interimTranscript}
+            isListening={isListening}
+            setIsListening={setIsListening}
+            error={error}
+            volume={volume}
           />
         }
       />

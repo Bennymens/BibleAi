@@ -7,11 +7,31 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html,
   body {
-    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+    position: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     touch-action: manipulation;
+    overscroll-behavior: none;
+  }
+
+  #root {
+    width: 100%;
+    height: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 
   @media (max-width: 768px) {
@@ -20,8 +40,11 @@
       backface-visibility: hidden;
     }
 
-    body {
+    html,
+    body,
+    #root {
       overscroll-behavior: none;
+      -webkit-overflow-scrolling: touch;
     }
   }
 }
