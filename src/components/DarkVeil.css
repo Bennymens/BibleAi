@@ -8,11 +8,14 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: transform;
+  opacity: 1;
+  z-index: 0;
 }
 
 @media (max-width: 768px) {
   .darkveil-canvas {
-    image-rendering: optimizeSpeed;
-    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 }

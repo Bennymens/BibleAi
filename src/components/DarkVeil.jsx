@@ -93,8 +93,10 @@ export default function DarkVeil({
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent,
       ) || window.innerWidth < 768;
-    const mobileDPR = isMobile ? 1 : Math.min(window.devicePixelRatio, 2);
-    const mobileResScale = isMobile ? 0.6 : resolutionScale;
+    const mobileDPR = isMobile
+      ? Math.min(window.devicePixelRatio, 2)
+      : Math.min(window.devicePixelRatio, 2);
+    const mobileResScale = isMobile ? 0.8 : resolutionScale;
 
     const renderer = new Renderer({
       dpr: mobileDPR,
@@ -138,13 +140,13 @@ export default function DarkVeil({
       frame = requestAnimationFrame(loop);
       frameCount++;
 
-      // Frame skipping on mobile (30fps instead of 60fps)
+      // Reduced frame skipping on mobile for better visibility
       if (isMobile && frameCount % 2 === 0) {
         return;
       }
 
       program.uniforms.uTime.value =
-        ((performance.now() - start) / 1000) * (isMobile ? speed * 0.7 : speed);
+        ((performance.now() - start) / 1000) * (isMobile ? speed * 0.9 : speed);
       program.uniforms.uHueShift.value = hueShift;
       program.uniforms.uNoise.value = noiseIntensity;
       program.uniforms.uScan.value = scanlineIntensity;
