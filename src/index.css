@@ -5,33 +5,56 @@
 @layer base {
   * {
     -webkit-tap-highlight-color: transparent;
-  }
-
-  html,
-  body {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
     width: 100%;
     height: 100%;
-    height: 100dvh; /* Dynamic viewport height for mobile */
     overflow: hidden;
     position: fixed;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    touch-action: manipulation;
     overscroll-behavior: none;
   }
 
-  #root {
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
     width: 100%;
     height: 100%;
-    height: 100dvh;
     overflow: hidden;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    html,
+    body,
+    #root {
+      height: -webkit-fill-available;
+      min-height: -webkit-fill-available;
+    }
   }
 
   @media (max-width: 768px) {
@@ -43,8 +66,27 @@
     html,
     body,
     #root {
-      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+      overscroll-behavior-x: none;
       -webkit-overflow-scrolling: touch;
     }
+  }
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
   }
 }

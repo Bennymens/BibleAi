@@ -29,7 +29,7 @@ function ListeningPage({
   };
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="fixed inset-0 w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         <DarkVeil
           hueShift={volume * 120}

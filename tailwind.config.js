@@ -4,10 +4,12 @@ export default {
   theme: {
     extend: {
       height: {
-        screen: ["100vh", "100dvh"], // Fallback to vh, then use dvh if supported
+        screen: "100%",
+        "screen-ios": "-webkit-fill-available",
       },
       minHeight: {
-        screen: ["100vh", "100dvh"],
+        screen: "100%",
+        "screen-ios": "-webkit-fill-available",
       },
     },
   },

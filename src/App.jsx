@@ -33,7 +33,7 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="h-screen bg-black flex items-center justify-center overflow-hidden">
+        <div className="fixed inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold mb-4">Something went wrong</h1>
             <p className="text-lg mb-4">
@@ -80,7 +80,7 @@ function HomePage({
   };
 
   return (
-    <div className="h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="fixed inset-0 w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden">
       <div className="absolute inset-0 w-full h-full">
         <DarkVeil
           hueShift={0}
