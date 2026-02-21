@@ -14,7 +14,6 @@ import BubbleButton from "./components/BubbleButton";
 import { startListening, stopListening } from "./utils/speechRecognition";
 import { startVolumeDetection, stopVolumeDetection } from "./utils/audioVolume";
 import { parseScripture } from "./utils/parseScripture";
-import { getScripture } from "./data/bibleDB";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -128,12 +127,22 @@ function AppContent() {
   const [interimTranscript, setInterimTranscript] = useState("");
 
   const fetchScripture = async (book, chapter, verse, trans) => {
-    const result = getScripture(book, chapter, verse, trans);
-
-    if (result) {
-      setScripture(result);
+    try {
+      const ref = encodeURIComponent(
+        `${book} ${chapter}:${verse}`.replace(/ /g, "_"),
+      );
+      const response = await fetch(`http://localhost:5000/api/verse/${ref}`);
+      if (!response.ok) throw new Error("Not found");
+      const data = await response.json();
+      setScripture({
+        book: data.reference.split(" ")[0],
+        chapter: data.reference.split(" ")[1]?.split(":")[0],
+        verse: data.reference.split(":")[1],
+        text: data.text,
+        translation: trans,
+      });
       setError("");
-    } else {
+    } catch (e) {
       setError(
         `Scripture not found: ${book} ${chapter}:${verse}. Try John 3:16, Psalm 23:1, or Genesis 1:1`,
       );
@@ -153,13 +162,11 @@ function AppContent() {
           setTranscript(finalText);
           setInterimTranscript("");
           const parsed = parseScripture(finalText);
-          if (parsed) {
-            fetchScripture(
-              parsed.book,
-              parsed.chapter,
-              parsed.verse,
-              translation,
-            );
+          if (parsed && parsed.reference) {
+            // Use normalized reference for backend lookup
+            const [book, chapterVerse] = parsed.reference.split(/ (.+)/);
+            const [chapter, verse] = chapterVerse.split(":");
+            fetchScripture(book, chapter, verse, translation);
           }
         }
         setInterimTranscript(interimText);

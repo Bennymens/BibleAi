@@ -224,5 +224,7 @@ export function parseScripture(transcript) {
   if (nums.length < 2) return null;
   const chapter = nums[0];
   const verse = nums[1];
-  return { book, chapter, verse };
+  // Always return a normalized reference string
+  const reference = `${book} ${chapter}:${verse}`;
+  return { book, chapter, verse, reference };
 }

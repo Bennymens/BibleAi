@@ -12,13 +12,13 @@ const VersePage = ({ scripture, onBack, translation, onTranslationChange }) => {
           transition={{ duration: 0.5 }}
           className="max-w-2xl w-full text-center px-4 py-6 sm:px-6 sm:py-8"
         >
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
-            {scripture.book} {scripture.chapter}:{scripture.verse}
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-700 mb-6 sm:mb-8 leading-relaxed">
-            {scripture.text}
-          </p>
+          <blockquote className="text-2xl sm:text-3xl md:text-4xl font-semibold italic text-gray-800 mb-4 sm:mb-6 leading-relaxed">
+            “{scripture.text}”
+          </blockquote>
           <div className="mb-6 sm:mb-8">
+            <span className="block text-lg sm:text-xl md:text-2xl font-bold text-blue-700 tracking-wide mb-2">
+              {scripture.book} {scripture.chapter}:{scripture.verse}
+            </span>
             <select
               value={translation}
               onChange={(e) => onTranslationChange(e.target.value)}
