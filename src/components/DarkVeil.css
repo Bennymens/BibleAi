@@ -1,15 +1,22 @@
 .darkveil-canvas {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  min-width: 100vw;
+  min-height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
   display: block;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: transform;
   opacity: 1;
-  z-index: 0;
+  z-index: 1;
+  pointer-events: none;
+  touch-action: none;
+  background: transparent;
 }
 
 @media (max-width: 768px) {
@@ -17,5 +24,18 @@
     image-rendering: auto;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    width: 100vw;
+    height: 100vh;
+    min-width: 100vw;
+    min-height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
+    touch-action: none;
+    background: transparent;
   }
 }
