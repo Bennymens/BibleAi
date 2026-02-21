@@ -40,6 +40,17 @@ app.get("/api/verse/:reference", (req, res) => {
   }
 });
 
+// Serve React static files
+const buildPath = path.join(__dirname, "..", "build");
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  // Fallback for client-side routing
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/api/")) return res.status(404).end();
+    res.sendFile(path.join(buildPath, "index.html"));
+  });
+}
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`BibleAI backend running on port ${PORT}`);

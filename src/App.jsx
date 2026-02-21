@@ -236,9 +236,9 @@ function AppContent() {
               setScripture(null);
               setTranscript("");
               setInterimTranscript("");
+              // Always return to listening page
+              navigate("/listening");
             }}
-            translation={translation}
-            onTranslationChange={handleTranslationChange}
           />
         }
       />
