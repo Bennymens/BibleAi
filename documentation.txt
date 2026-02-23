@@ -1,0 +1,117 @@
+BibleAI Web Application Documentation
+
+1. Project Overview
+BibleAI is a comprehensive web application built to address the unique needs of church media teams. During live services, media teams are often tasked with quickly displaying scripture passages on screens for the congregation. This process can be stressful and prone to delays, especially when passages are requested unexpectedly or in rapid succession. BibleAI leverages artificial intelligence and real-time technologies to automate and simplify this task. By providing fast, accurate scripture retrieval and display, the app ensures that worship services run smoothly, allowing media teams to focus on supporting the spiritual experience rather than technical challenges.
+
+2. Project Name
+BibleAI
+
+3. Purpose
+The main purpose of BibleAI is to remove the bottlenecks and manual errors associated with scripture display during church services. Traditionally, media teams must manually search for passages, which can lead to delays, mistakes, and distractions. BibleAI automates this process, enabling instant access to scripture passages through search, speech recognition, and real-time updates. This not only improves the efficiency of the media team but also enhances the overall worship experience for the congregation by ensuring that scripture is presented promptly and accurately.
+
+4. Project Goals
+The goals of BibleAI are:
+- Eliminate delays in scripture display during church services by providing instant access to passages.
+- Improve accuracy and reduce manual errors in scripture selection and presentation.
+- Enable hands-free operation through AI-powered speech recognition, allowing media teams to focus on service flow.
+- Support multiple Bible translations to cater to diverse congregations and preferences.
+- Facilitate real-time collaboration and updates among media team members, ensuring everyone is synchronized.
+- Provide a user-friendly, intuitive interface that minimizes training and onboarding time.
+- Ensure the system is scalable, reliable, and secure for use in various church environments.
+- Maintain a modular and maintainable codebase for easy feature expansion and long-term support.
+
+5. Scope
+BibleAI is designed specifically for scripture management and display. Its scope includes features such as fast scripture search, support for multiple translations, real-time updates, and AI-powered speech recognition. The app provides a user-friendly interface tailored for media team operations and maintains a backend database for scripture storage. However, it intentionally excludes features unrelated to scripture display, such as live streaming, video production, or broader church management tools like attendance tracking and donation management. This focused scope ensures that BibleAI remains lightweight, efficient, and easy to use for its intended audience.
+
+6. Core Problems Being Solved
+BibleAI directly addresses several core challenges faced by church media teams:
+ - Delays in pulling up scripture passages, which can disrupt the flow of worship services.
+ - Manual errors in selecting and displaying the correct scripture, leading to confusion or distraction.
+ - Lack of real-time collaboration and updates, which can result in miscommunication among team members.
+By solving these problems, BibleAI empowers media teams to operate more efficiently, reduces stress during services, and ensures that scripture is always presented in a timely and accurate manner.
+
+7. Features
+BibleAI offers a robust set of features designed to optimize scripture management for church media teams:
+
+- Fast Scripture Search and Retrieval: Users can quickly search for any scripture passage using keywords, references, or phrases. The search is optimized for speed and accuracy, ensuring results are delivered almost instantly.
+- Multi-Translation Support: The app supports multiple Bible translations, allowing users to select their preferred version for display. This is especially useful for churches with diverse congregations or multilingual needs.
+- AI-Powered Speech Recognition: Media team members can use voice commands to search for and display scripture passages, enabling hands-free operation and reducing the need for manual input during busy services.
+- Real-Time Scripture Display Updates: Changes made by one user are instantly reflected across all connected devices, ensuring seamless collaboration and up-to-date displays.
+- User-Friendly Interface: The UI is designed for ease of use, with intuitive navigation, clear visuals, and customizable themes to match the church’s branding or preferences.
+- Scripture Cards and Verse Pages: Passages are presented in visually appealing cards and pages, making it easy to read and display scripture on screens.
+- Audio Volume Control: Built-in utilities allow for easy adjustment of audio levels when scripture is read aloud, ensuring clarity and accessibility.
+- Speech Parsing Utilities: Advanced parsing tools interpret spoken scripture references, converting them into accurate search queries.
+- Backend Database Integration: All scripture data is stored securely in a backend database, enabling fast retrieval and reliable storage.
+- Notification System: The app can notify media team members of important updates or changes, improving communication and coordination.
+- Accessibility Features: BibleAI includes accessibility options such as high-contrast modes and screen reader support, making it usable for all team members.
+- Modular Component Design: The codebase is structured with reusable components, allowing for easy maintenance and future feature expansion.
+6. Core Problems Being Solved
+BibleAI directly addresses several core challenges faced by church media teams:
+ - Delays in pulling up scripture passages, which can disrupt the flow of worship services.
+ - Manual errors in selecting and displaying the correct scripture, leading to confusion or distraction.
+ - Lack of real-time collaboration and updates, which can result in miscommunication among team members.
+By solving these problems, BibleAI empowers media teams to operate more efficiently, reduces stress during services, and ensures that scripture is always presented in a timely and accurate manner.
+
+7. Features
+
+8. Functional Requirements
+- The system must allow users to search for and display scripture passages.
+- The system must support multiple Bible translations.
+- The system must provide real-time updates to all connected users.
+- The system must parse spoken scripture references and display results.
+- The system must store and retrieve scripture data from a backend database.
+
+9. Non-Functional Requirements
+- Speed: The system must respond to scripture queries within 1 second.
+- Scalability: The system must support multiple concurrent users.
+- Security: User data and scripture content must be protected from unauthorized access.
+- Reliability: The system must be available during all church service hours.
+- Maintainability: Codebase must be modular and well-documented.
+
+10. Technology Stack
+- Frontend: React, Vite, Tailwind CSS
+- Backend: Node.js, Express
+- Database: JSON-based storage (bibleDB.json)
+- AI/Utilities: Custom JavaScript modules for speech recognition and parsing
+
+11. System Architecture
+- Frontend (src/): Handles UI, scripture search, and real-time updates.
+- Backend (backend/): Provides API endpoints, manages bibleDB.json.
+- API (api/): Contains scripture.js for scripture-related operations.
+- Database (backend/bibleDB.json): Stores scripture data.
+- Utilities (src/utils/): Handles audio, parsing, and speech recognition.
+
+12. User Guide
+- Launch the app using `npm run dev`.
+- Use the search bar to find scripture passages.
+- Select translation as needed.
+- Use speech recognition for hands-free scripture lookup.
+- View scripture cards and verse pages for detailed display.
+
+13. Design Documents
+- Component-based UI design (React).
+- Modular backend API structure.
+- Responsive and accessible interface (Tailwind CSS).
+- Real-time update mechanism for scripture display.
+
+14. Security
+- Input validation for scripture queries.
+- Secure API endpoints.
+- Protection of bibleDB.json from unauthorized access.
+- No sensitive user data stored.
+
+15. Deployment Documentation
+- Install dependencies with `npm install`.
+- Start backend server with `node backend/index.js`.
+- Launch frontend with `npm run dev`.
+- Configure environment variables as needed.
+- Deploy to cloud or local server as required.
+
+16. Maintenance and Support
+- Regular updates to scripture database.
+- Bug tracking and issue resolution via GitHub.
+- Modular codebase for easy feature addition.
+- Documentation updates with each release.
+- Community and developer support via README and online forums.
+
+End of Documentation.

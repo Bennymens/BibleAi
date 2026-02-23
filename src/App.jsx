@@ -128,10 +128,9 @@ function AppContent() {
 
   const fetchScripture = async (book, chapter, verse, trans) => {
     try {
-      const ref = encodeURIComponent(
-        `${book} ${chapter}:${verse}`.replace(/ /g, "_"),
-      );
-      const response = await fetch(`http://localhost:5000/api/verse/${ref}`);
+      // Use query parameter for Vercel serverless function
+      const ref = encodeURIComponent(`${book} ${chapter}:${verse}`);
+      const response = await fetch(`/api/verse?reference=${ref}`);
       if (!response.ok) throw new Error("Not found");
       const data = await response.json();
       setScripture({
@@ -194,6 +193,7 @@ function AppContent() {
     }
   };
 
+  // Always clear scripture when entering /listening so new verses can be loaded
   return (
     <Routes>
       <Route
@@ -226,6 +226,10 @@ function AppContent() {
             volume={volume}
           />
         }
+        // Reset scripture state on entering listening page
+        onEnter={() => {
+          setScripture(null);
+        }}
       />
       <Route
         path="/verse"
