@@ -10,23 +10,30 @@ function ListeningPage({
   setIsListening,
   error,
   volume,
+  onReset,
 }) {
   const navigate = useNavigate();
 
-  // Automatically start listening when the page loads
+  // On mount: always reset to a fresh session then start listening
   useEffect(() => {
+    if (onReset) onReset();
     setIsListening(true);
 
     // Cleanup: stop listening when leaving the page
     return () => {
       setIsListening(false);
     };
-  }, [setIsListening]);
+  }, [setIsListening]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleStop = () => {
     setIsListening(false);
     navigate("/");
   };
+
+  // Determine what to show:
+  // - transcript = finalized speech (show in white)
+  // - interimTranscript = in-progress speech (show in amber/gray italic)
+  const hasContent = transcript || interimTranscript;
 
   return (
     <div className="fixed inset-0 w-full h-full bg-black flex flex-col items-center justify-center overflow-hidden safe-area">
@@ -45,9 +52,19 @@ function ListeningPage({
         {/* Listening indicator */}
         <div>
           <div className="relative">
-            {/* Pulsing circle */}
-            <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-purple-500 opacity-20 animate-ping absolute"></div>
-            <div className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-purple-600 flex items-center justify-center relative">
+            {/* Pulsing circles — faster pulse when volume is high */}
+            <div
+              className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-purple-500 opacity-20 animate-ping absolute"
+              style={{ animationDuration: isListening ? `${Math.max(0.6, 1.5 - volume)}s` : "1.5s" }}
+            ></div>
+            <div
+              className="w-32 h-32 sm:w-36 sm:h-36 rounded-full bg-purple-600 flex items-center justify-center relative transition-all duration-150"
+              style={{
+                boxShadow: volume > 0.05
+                  ? `0 0 ${Math.round(volume * 60 + 20)}px ${Math.round(volume * 30 + 8)}px rgba(168,85,247,${Math.min(0.7, volume * 2 + 0.15)})`
+                  : "none",
+              }}
+            >
               <svg
                 className="w-16 h-16 sm:w-18 sm:h-18 text-white"
                 fill="currentColor"
@@ -76,23 +93,33 @@ function ListeningPage({
         <div className="w-full max-w-md sm:max-w-lg">
           <div className="h-2.5 bg-gray-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-100"
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-75"
               style={{ width: `${volume * 100}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Transcript display */}
+        {/* Transcript display — shows confirmed + interim text together */}
         <div className="min-h-[70px] sm:min-h-[90px] w-full">
-          {(transcript || interimTranscript) && (
-            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 sm:p-5">
-              <p className="text-lg sm:text-xl md:text-2xl text-white break-words">
-                {transcript || (
-                  <span className="text-gray-400 italic">
+          {hasContent && (
+            <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 sm:p-5 border border-white border-opacity-10">
+              <p className="text-lg sm:text-xl md:text-2xl text-white break-words leading-relaxed">
+                {transcript && (
+                  <span className="text-white font-medium">{transcript} </span>
+                )}
+                {interimTranscript && (
+                  <span className="text-amber-300 italic opacity-80">
                     {interimTranscript}
                   </span>
                 )}
               </p>
+            </div>
+          )}
+          {!hasContent && isListening && (
+            <div className="flex items-center justify-center gap-1.5 mt-2">
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "0ms" }}></span>
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "150ms" }}></span>
+              <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: "300ms" }}></span>
             </div>
           )}
         </div>

@@ -1,43 +1,67 @@
-import fs from "fs";
-import path from "path";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+// ES module-safe __dirname (works on Vercel AND locally)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load DB once at cold-start — same file sits next to this handler
+const bibleDB = JSON.parse(
+  readFileSync(join(__dirname, "bibleDB.json"), "utf-8")
+);
 
 export default function handler(req, res) {
-  // Only allow GET
+  // CORS headers so the frontend can call this from any origin
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
+
   if (req.method !== "GET") {
     res.status(405).json({ error: "Method not allowed" });
     return;
   }
 
-  // Get reference from query string
   const { reference } = req.query;
   if (!reference) {
     res.status(400).json({ error: "Missing reference parameter" });
     return;
   }
 
-  // Load bibleDB.json from the api folder (works locally and on Vercel)
-  const dbPath = path.join(process.cwd(), "api", "bibleDB.json");
-  let bibleDB = [];
-  try {
-    bibleDB = JSON.parse(fs.readFileSync(dbPath, "utf-8"));
-  } catch (e) {
-    res.status(500).json({ error: "Failed to load bibleDB.json" });
-    return;
-  }
-
   const refRaw = reference.replace(/_/g, " ").toLowerCase().trim();
-  // Try to match with colon (Book Chapter:Verse)
-  let verse = bibleDB.find((v) => v.reference.toLowerCase().trim() === refRaw);
-  if (!verse) {
-    // Try to match with space (Book Chapter Verse)
-    const refSpace = refRaw.replace(/:/g, " ");
-    verse = bibleDB.find(
-      (v) => v.reference.toLowerCase().replace(/:/g, " ").trim() === refSpace,
+
+  // Try exact match (e.g. "john 3:16")
+  let entry = bibleDB.find(
+    (v) => v.reference.toLowerCase().trim() === refRaw
+  );
+
+  // Try match ignoring colon vs space (e.g. "john 3 16")
+  if (!entry) {
+    const refSpaced = refRaw.replace(/:/g, " ");
+    entry = bibleDB.find(
+      (v) => v.reference.toLowerCase().replace(/:/g, " ").trim() === refSpaced
     );
   }
-  if (verse) {
-    res.status(200).json(verse);
+
+  // Try with "Psalm" ↔ "Psalms" book name variant
+  if (!entry) {
+    let altRef = refRaw;
+    if (refRaw.startsWith("psalms ")) altRef = "psalm " + refRaw.slice(7);
+    else if (refRaw.startsWith("psalm ")) altRef = "psalms " + refRaw.slice(6);
+    if (altRef !== refRaw) {
+      entry = bibleDB.find(
+        (v) => v.reference.toLowerCase().trim() === altRef
+      );
+    }
+  }
+
+  if (entry) {
+    res.status(200).json(entry);
   } else {
-    res.status(404).json({ error: "Verse not found" });
+    res.status(404).json({ error: `Verse not found: ${reference}` });
   }
 }

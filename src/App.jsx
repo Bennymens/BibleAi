@@ -14,6 +14,7 @@ import BubbleButton from "./components/BubbleButton";
 import { startListening, stopListening } from "./utils/speechRecognition";
 import { startVolumeDetection, stopVolumeDetection } from "./utils/audioVolume";
 import { parseScripture } from "./utils/parseScripture";
+import bibleDB from "../api/bibleDB.json";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -127,16 +128,51 @@ function AppContent() {
   const [interimTranscript, setInterimTranscript] = useState("");
 
   const fetchScripture = async (book, chapter, verse, trans) => {
+    // Normalize book name variants (e.g. "Psalms" → try both)
+    const bookVariants = [book];
+    if (book === "Psalms") bookVariants.push("Psalm");
+    if (book === "Psalm") bookVariants.push("Psalms");
+
+    // 1. Try local bibleDB first (instant, no network needed)
+    const chNum = parseInt(chapter);
+    const vNum = parseInt(verse);
+    let localEntry = null;
+    for (const bk of bookVariants) {
+      const refExact = `${bk} ${chNum}:${vNum}`;
+      localEntry = bibleDB.find(
+        (v) => v.reference.toLowerCase().trim() === refExact.toLowerCase().trim()
+      );
+      if (localEntry) break;
+    }
+
+    if (localEntry) {
+      const parts = localEntry.reference.split(" ");
+      const chapterVersePart = parts[parts.length - 1];
+      const [ch, vs] = chapterVersePart.split(":");
+      setScripture({
+        book: parts.slice(0, parts.length - 1).join(" "),
+        chapter: ch,
+        verse: vs,
+        text: localEntry.text,
+        translation: trans,
+      });
+      setError("");
+      return;
+    }
+
+    // 2. Fall back to network API (for Vercel / production)
     try {
-      // Use query parameter for Vercel serverless function
       const ref = encodeURIComponent(`${book} ${chapter}:${verse}`);
       const response = await fetch(`/api/verse?reference=${ref}`);
       if (!response.ok) throw new Error("Not found");
       const data = await response.json();
+      const refParts = data.reference.split(" ");
+      const cvPart = refParts[refParts.length - 1];
+      const [ch, vs] = cvPart.split(":");
       setScripture({
-        book: data.reference.split(" ")[0],
-        chapter: data.reference.split(" ")[1]?.split(":")[0],
-        verse: data.reference.split(":")[1],
+        book: refParts.slice(0, refParts.length - 1).join(" "),
+        chapter: ch,
+        verse: vs,
         text: data.text,
         translation: trans,
       });
@@ -156,19 +192,29 @@ function AppContent() {
   }, [scripture, navigate]);
   useEffect(() => {
     if (isListening) {
+      // Track last fetched reference to avoid duplicate API calls
+      let lastFetchedRef = null;
+
       startListening((finalText, interimText) => {
         if (finalText) {
           setTranscript(finalText);
           setInterimTranscript("");
           const parsed = parseScripture(finalText);
-          if (parsed && parsed.reference) {
-            // Use normalized reference for backend lookup
-            const [book, chapterVerse] = parsed.reference.split(/ (.+)/);
-            const [chapter, verse] = chapterVerse.split(":");
-            fetchScripture(book, chapter, verse, translation);
+          if (parsed) {
+            // Only fetch if not already fetched for this reference (e.g. interim already triggered it)
+            if (parsed.reference !== lastFetchedRef) {
+              lastFetchedRef = parsed.reference;
+              fetchScripture(parsed.book, parsed.chapter, parsed.verse, translation);
+            }
+          }
+        } else if (interimText) {
+          setInterimTranscript(interimText);
+          const parsed = parseScripture(interimText);
+          if (parsed && parsed.reference !== lastFetchedRef) {
+            lastFetchedRef = parsed.reference;
+            fetchScripture(parsed.book, parsed.chapter, parsed.verse, translation);
           }
         }
-        setInterimTranscript(interimText);
       });
       startVolumeDetection(setVolume);
     } else {
@@ -224,12 +270,14 @@ function AppContent() {
             setIsListening={setIsListening}
             error={error}
             volume={volume}
+            onReset={() => {
+              setTranscript("");
+              setInterimTranscript("");
+              setScripture(null);
+              setError("");
+            }}
           />
         }
-        // Reset scripture state on entering listening page
-        onEnter={() => {
-          setScripture(null);
-        }}
       />
       <Route
         path="/verse"

@@ -10,22 +10,29 @@ if (SpeechRecognition) {
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = "en-US";
+  // maxAlternatives = 1 (default) — keeps the best result
+  recognition.maxAlternatives = 1;
 
   recognition.onresult = (event) => {
     let finalTranscript = "";
     let interimTranscript = "";
+
     for (let i = event.resultIndex; i < event.results.length; i++) {
       const result = event.results[i];
+      const text = result[0].transcript;
       if (result.isFinal) {
-        finalTranscript += result[0].transcript;
+        finalTranscript += text;
       } else {
-        interimTranscript += result[0].transcript;
+        interimTranscript += text;
       }
     }
-    if (finalTranscript && onResultCallback) {
-      onResultCallback(finalTranscript, interimTranscript);
-    } else if (interimTranscript && onResultCallback) {
-      onResultCallback("", interimTranscript);
+
+    if (!onResultCallback) return;
+
+    if (finalTranscript) {
+      onResultCallback(finalTranscript.trim(), "");
+    } else if (interimTranscript) {
+      onResultCallback("", interimTranscript.trim());
     }
   };
 
@@ -35,43 +42,36 @@ if (SpeechRecognition) {
 
   recognition.onend = () => {
     isStarting = false;
-    if (isListening && !isStarting) {
+    // Only auto-restart if we explicitly want to keep listening
+    if (isListening) {
       try {
         isStarting = true;
         recognition.start();
       } catch (err) {
-        console.error("Failed to restart recognition:", err);
+        console.warn("Failed to restart recognition:", err);
         isStarting = false;
       }
     }
   };
 
   recognition.onerror = (event) => {
-    console.error("Speech recognition error", event.error);
     isStarting = false;
+    const ignorable = ["aborted", "no-speech", "already-started"];
+    if (ignorable.includes(event.error)) return;
+    console.error("Speech recognition error:", event.error);
 
-    // Don't retry on certain errors
-    if (event.error === "aborted" || event.error === "no-speech") {
-      return;
-    }
-
-    // For "already started" error, just ignore it
-    if (event.error === "already-started") {
-      return;
-    }
-
-    if (isListening && !isStarting) {
+    if (isListening) {
       setTimeout(() => {
         if (isListening && !isStarting) {
           try {
             isStarting = true;
             recognition.start();
           } catch (err) {
-            console.error("Failed to restart after error:", err);
+            console.warn("Failed to restart after error:", err);
             isStarting = false;
           }
         }
-      }, 1000);
+      }, 500);
     }
   };
 }
@@ -81,28 +81,36 @@ export function startListening(callback) {
     console.error("Speech recognition not supported");
     return;
   }
-  onResultCallback = callback;
-  if (!isListening && !isStarting) {
-    isListening = true;
-    isStarting = true;
+
+  // If already active, stop it first so we get a completely fresh session
+  if (isListening || isStarting) {
+    isListening = false;
+    isStarting = false;
     try {
-      recognition.start();
-    } catch (err) {
-      console.error("Failed to start recognition:", err);
-      isStarting = false;
-      isListening = false;
-    }
+      recognition.abort(); // abort (not stop) so onend fires but won't restart
+    } catch (_) {}
+  }
+
+  onResultCallback = callback;
+  isListening = true;
+  isStarting = true;
+  try {
+    recognition.start();
+  } catch (err) {
+    console.warn("Failed to start recognition:", err);
+    isStarting = false;
+    isListening = false;
   }
 }
 
 export function stopListening() {
-  if (recognition && isListening) {
-    isListening = false;
-    isStarting = false;
-    try {
-      recognition.stop();
-    } catch (err) {
-      console.error("Failed to stop recognition:", err);
-    }
+  if (!recognition) return;
+  isListening = false;
+  isStarting = false;
+  onResultCallback = null;
+  try {
+    recognition.abort(); // abort immediately; no restart will happen
+  } catch (err) {
+    console.warn("Failed to stop recognition:", err);
   }
 }
