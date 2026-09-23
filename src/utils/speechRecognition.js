@@ -1,19 +1,20 @@
 const SpeechRecognition =
   window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = null;
-let isListening = false;
-let isStarting = false;
-let onResultCallback = null;
+let isActive = false;      // true = we want the mic running
+let isStarting = false;    // true = start() was called, waiting for onstart
+let pendingCallback = null;
 
 if (SpeechRecognition) {
   recognition = new SpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = "en-US";
-  // maxAlternatives = 1 (default) — keeps the best result
   recognition.maxAlternatives = 1;
 
   recognition.onresult = (event) => {
+    if (!pendingCallback) return;
+
     let finalTranscript = "";
     let interimTranscript = "";
 
@@ -27,12 +28,10 @@ if (SpeechRecognition) {
       }
     }
 
-    if (!onResultCallback) return;
-
     if (finalTranscript) {
-      onResultCallback(finalTranscript.trim(), "");
+      pendingCallback(finalTranscript.trim(), "");
     } else if (interimTranscript) {
-      onResultCallback("", interimTranscript.trim());
+      pendingCallback("", interimTranscript.trim());
     }
   };
 
@@ -42,36 +41,43 @@ if (SpeechRecognition) {
 
   recognition.onend = () => {
     isStarting = false;
-    // Only auto-restart if we explicitly want to keep listening
-    if (isListening) {
-      try {
-        isStarting = true;
-        recognition.start();
-      } catch (err) {
-        console.warn("Failed to restart recognition:", err);
-        isStarting = false;
-      }
+    // Auto-restart only if we still want to be active
+    if (isActive) {
+      // Small delay to avoid tight loops on some browsers
+      setTimeout(() => {
+        if (isActive && !isStarting) {
+          try {
+            isStarting = true;
+            recognition.start();
+          } catch (err) {
+            isStarting = false;
+            console.warn("Restart failed:", err);
+          }
+        }
+      }, 100);
     }
   };
 
   recognition.onerror = (event) => {
     isStarting = false;
-    const ignorable = ["aborted", "no-speech", "already-started"];
-    if (ignorable.includes(event.error)) return;
+    // These are not real errors — ignore them
+    const ignorable = ["aborted", "no-speech"];
+    if (ignorable.includes(event.error)) {
+      // For no-speech: onend will fire and we'll auto-restart anyway
+      return;
+    }
     console.error("Speech recognition error:", event.error);
-
-    if (isListening) {
+    if (isActive) {
       setTimeout(() => {
-        if (isListening && !isStarting) {
+        if (isActive && !isStarting) {
           try {
             isStarting = true;
             recognition.start();
           } catch (err) {
-            console.warn("Failed to restart after error:", err);
             isStarting = false;
           }
         }
-      }, 500);
+      }, 300);
     }
   };
 }
@@ -82,35 +88,45 @@ export function startListening(callback) {
     return;
   }
 
-  // If already active, stop it first so we get a completely fresh session
-  if (isListening || isStarting) {
-    isListening = false;
-    isStarting = false;
-    try {
-      recognition.abort(); // abort (not stop) so onend fires but won't restart
-    } catch (_) {}
-  }
+  pendingCallback = callback;
 
-  onResultCallback = callback;
-  isListening = true;
+  // Already running with a valid callback — just swap the callback, don't restart
+  if (isActive) return;
+
+  // Fresh start
+  isActive = true;
   isStarting = true;
+
   try {
     recognition.start();
   } catch (err) {
-    console.warn("Failed to start recognition:", err);
+    // If it was already started (e.g. stale state), abort and retry
     isStarting = false;
-    isListening = false;
+    try {
+      recognition.abort();
+    } catch (_) {}
+    setTimeout(() => {
+      if (isActive && !isStarting) {
+        try {
+          isStarting = true;
+          recognition.start();
+        } catch (e) {
+          isStarting = false;
+          console.warn("Failed to start after abort:", e);
+        }
+      }
+    }, 200);
   }
 }
 
 export function stopListening() {
   if (!recognition) return;
-  isListening = false;
+  isActive = false;
   isStarting = false;
-  onResultCallback = null;
+  pendingCallback = null;
   try {
-    recognition.abort(); // abort immediately; no restart will happen
+    recognition.abort();
   } catch (err) {
-    console.warn("Failed to stop recognition:", err);
+    console.warn("Stop failed:", err);
   }
 }
