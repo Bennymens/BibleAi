@@ -73,7 +73,7 @@ export default defineConfig({
   plugins: [react(), devApiPlugin()],
   // Build: output React app into "build" so the backend can serve it
   build: {
-    outDir: "build",
+    outDir: "dist",
     emptyOutDir: true,
   },
 });
